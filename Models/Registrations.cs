@@ -1,8 +1,9 @@
 ﻿namespace ProjetoGusmaoFinal.Models
 {
-    public class Registration
+    public class Registrations
     {
         public int Id { get; set; }
+        public required string CPF { get; set; }
         public required string ClassName { get; set; }
         public DateTime CreatedAt { get; set; }
     }
