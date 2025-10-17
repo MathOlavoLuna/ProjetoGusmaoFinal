@@ -19,7 +19,6 @@ namespace ProjetoGusmaoFinal.Data
             .HasForeignKey(u => u.RoleID);
 
             modelBuilder.Entity<BookCategories>().HasMany<Books>().WithMany(b => b.BookCategories); //Para fazermos many-to-many temos que ter uma List<> do tipo de dados.
-
         }
     }
 }
