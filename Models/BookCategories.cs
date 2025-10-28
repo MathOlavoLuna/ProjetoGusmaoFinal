@@ -3,7 +3,8 @@
     public class BookCategories
     {
         public int Id { get; set; }
-        public int BookID { get; set; }
-        public int CategoryID { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public List<Books> Books { get; set; }
     }
 }
