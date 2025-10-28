@@ -3,7 +3,6 @@ using ProjetoGusmaoFinal.Components;
 using ProjetoGusmaoFinal.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-var ConnectionString = "server=localhost;user=root;password=luna;database=projectg";
 var serverVersion = new MariaDbServerVersion(new Version(12, 0, 2));
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -19,7 +18,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-builder.Services.AddDbContext<DataContext>(options => options.UseMySql(ConnectionString, serverVersion));
+builder.Services.AddDbContext<DataContext>(options => 
+options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), serverVersion));
 
 app.UseHttpsRedirection();
 
