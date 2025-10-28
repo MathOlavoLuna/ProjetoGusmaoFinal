@@ -7,24 +7,9 @@
         public required int RoleID { get; set; }
         public required string Name { get; set; }
         public required string Email { get; set; }
-        public string Password;
-        public string CPF;
+        public string Password { get; set; }
+        public string CPF { get; set; }
+        public List<News> News { get; set; }
 
-        public void SetPassword(string Password)
-        {
-            _Password = Password;
-        }
-        public void GetPassword()
-        {
-
-        }
-        public void SetCPF()
-        {
-
-        }
-        public void GetCPF()
-        {
-
-        }
     }
 }
