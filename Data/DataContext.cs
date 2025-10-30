@@ -15,10 +15,7 @@ namespace ProjetoGusmaoFinal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)//no Model creating definimos relação e caracteristicas de campos, tipo NOT NULL ou coisa do tipo;
         {
             modelBuilder.Entity<Users>().HasIndex(u => u.Email).IsUnique();
-            modelBuilder.Entity<Roles>().HasMany<Users>().WithOne(u => u.Role)
-            .HasForeignKey(u => u.RoleID);
-
-            modelBuilder.Entity<BookCategories>().HasMany<Books>().WithMany(b => b.BookCategories); //Para fazermos many-to-many temos que ter uma List<> do tipo de dados.
+            modelBuilder.Entity<Users>().HasIndex( u => u.CPF).IsUnique();
         }
     }
 }
