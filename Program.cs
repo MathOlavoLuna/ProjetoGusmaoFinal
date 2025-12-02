@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProjetoGusmaoFinal.Components;
 using ProjetoGusmaoFinal.Data;
+using ProjetoGusmaoFinal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var serverVersion = new MariaDbServerVersion(new Version(12, 0, 2));
@@ -8,6 +9,7 @@ var serverVersion = new MariaDbServerVersion(new Version(12, 0, 2));
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddScoped(typeof(CRUDService<>));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
