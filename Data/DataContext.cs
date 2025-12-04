@@ -15,8 +15,7 @@ namespace ProjetoGusmaoFinal.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)//no Model creating definimos relação e caracteristicas de campos, tipo NOT NULL ou coisa do tipo;
         {
             modelBuilder.Entity<Users>().HasIndex(u => u.Email).IsUnique();
-            modelBuilder.Entity<Users>().HasIndex(u => u.CPF).IsUnique();
- 
+            modelBuilder.Entity<Users>().HasIndex( u => u.CPF).IsUnique();
         }
     }
 }

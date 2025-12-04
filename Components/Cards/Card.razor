@@ -1,0 +1,21 @@
+﻿<link href="homeCards.css" rel="stylesheet" />
+
+@code {
+    [Parameter]
+    public string CardTitle { get; set; } = string.Empty;
+    [Parameter]
+    public string CardText { get; set; } = string.Empty;
+    [Parameter]
+    public string URLImage { get; set; } = string.Empty;
+}
+
+<div class="col-12 col-md-3 p-0">
+    <div class="card">
+        <div class="card-body d-flex justify-content-center align-items-center gap-2">
+            <img src="@URLImage">
+            <h5 class="card-values-title">@CardTitle</h5>
+        </div>
+        <p class="card-text">@CardText</p>
+        @* <a href="#" class="btn btn-primary">Go somewhere</a> *@
+    </div>
+</div>

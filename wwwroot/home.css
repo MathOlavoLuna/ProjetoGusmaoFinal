@@ -1,0 +1,31 @@
+﻿.home-school-name{
+    font-size: 4.5rem;
+}
+.home-background-image{
+    height: 500px;
+    background-image:url(images/HomeBackgroundImagem.jpg);
+    background-size:cover;
+    background-position:center;
+    background-repeat: no-repeat;
+}
+.home-text-values {
+    font:800;
+    font-size:2.1rem;
+    color: #0049df;
+}
+
+.row{
+    margin-bottom: 45px;
+}
+
+.home-bg-footer {
+    color: #FFF;
+    background-color: #1054e2;
+    padding: 25px;
+}
+@media screen and (min-width: 500px) { 
+    .home-school-name{
+        font-size: 6rem;
+    }
+}
+
