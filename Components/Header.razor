@@ -1,0 +1,32 @@
+﻿<link href="header.css" rel="stylesheet" />
+
+<div class="row p-4 header-navbar bg-white position-fixed w-100 text-white m-0 ">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <img class="navbar-logo" src="images/LogoGusmão.png" /> @*IMAGEM LOGO*@
+            <span class="text-dark fs-4" style="font-weight:700;">GUSMÃO</span>
+        </div>
+        <div class="d-flex gap-3">
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">HOME</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">NÓTICIAS</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">FUNDAMENTAL</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">ENSINO MÉDIO</span>
+        </div>
+    </div>
+</div>
+
+<style>
+    .header-navbar{
+        z-index: 9999;
+    }
+</style>
+<script>
+    window.addEventListener('scroll', ()=>{
+        const NavBar = document.querySelector('.header-navbar');
+        if(window.scrollY > 500){
+            NavBar.classList.add('header-navbar-scroll');
+        }else if(window.scrollY < 500){
+            NavBar.classList.remove('header-navbar-scroll');
+        }
+    })
+</script>
