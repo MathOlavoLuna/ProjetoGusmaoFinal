@@ -1,5 +1,4 @@
 ﻿using ProjetoGusmaoFinal.Classes;
-using ProjetoGusmaoFinal.Data;
 using ProjetoGusmaoFinal.Models;
 
 namespace ProjetoGusmaoFinal.Services
