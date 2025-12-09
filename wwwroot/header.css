@@ -8,6 +8,14 @@
     background-color: #1054E2;
 }
 
+.navbar-option-scrollY {
+    background-color: #EAC556;
+}
+
 .header-navbar-scroll {
     background-color: #1054e2 !important;
+}
+
+.navbar-title-scrollY{
+    color: white !important;
 }
