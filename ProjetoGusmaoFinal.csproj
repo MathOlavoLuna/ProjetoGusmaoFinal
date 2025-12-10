@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repository\**" />
+    <Content Remove="Repository\**" />
+    <EmbeddedResource Remove="Repository\**" />
+    <None Remove="Repository\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="C:\Users\MatheusLuna\.nuget\packages\bootstrap\5.3.8\contentFiles\any\any\wwwroot\css\bootstrap-grid.css" />
     <Content Remove="C:\Users\MatheusLuna\.nuget\packages\bootstrap\5.3.8\contentFiles\any\any\wwwroot\css\bootstrap-grid.css.map" />
     <Content Remove="C:\Users\MatheusLuna\.nuget\packages\bootstrap\5.3.8\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css" />
@@ -68,7 +75,6 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Repository\" />
   </ItemGroup>
 
 </Project>
