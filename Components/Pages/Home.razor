@@ -1,19 +1,12 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
+
 @page "/"
-
+@attribute [Authorize]
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = auth.User;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            Nav.NavigateTo("/Login", forceLoad: true);
-        }
-    }
 }
 
 <!DOCTYPE html>
