@@ -7,18 +7,33 @@
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
 </head>
    
-<div class="container d-flex justify-content-center align-items-center min-vh-100">
+<div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
+    <div class="row">
+        <h1>GUSMÃO BRITTO</h1>
+    </div>
     <div class="row">
         <div class="col-12">
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="card-title">LOGIN</h5>
-                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-                    <a href="#" class="card-link">Card link</a>
-                    <a href="#" class="card-link">Another link</a>
+            <form class="border border-1 rounded-3 p-2">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    <div id="emailHelp" class="form-text">Não compartilhamos seu e-mail com mais ninguém.</div>
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label for="exampleInputPassword1" class="form-label">Senha</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1">Mantenha-se conectado</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+
+                <ul>
+                    <li><span>Não tem conta? <a>cadastre-se</a></span></li>
+                    <li><span><a>Esqueci minha senha</a></span></li>
+                </ul>               
+            </form>
         </div>
     </div>
 </div>
