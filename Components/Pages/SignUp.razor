@@ -1,0 +1,104 @@
+﻿@page "/SignUp"
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Nav
+@attribute [AllowAnonymous]
+
+@code {
+    private SignUpModel model = new();
+
+    private void HandleSubmit()
+    {
+        
+        // Aqui o form já passou por validação
+        // Exemplo:
+        // - salvar no banco
+        // - criar usuário
+        // - redirecionar para login
+
+        Console.WriteLine("Cadastro válido");
+    }
+
+    public class SignUpModel
+    {
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        public string Nome { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Sobrenome é obrigatório")]
+        public string Sobrenome { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Senha é obrigatória")]
+        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
+        public string Senha { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "CPF é obrigatório")]
+        public string Cpf { get; set; } = string.Empty;
+
+        public bool ManterConectado { get; set; }
+    }
+}
+
+<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
+        <div class="row">
+            <h1>Cadastre-se</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="border border-1 rounded-3 p-3" style="min-width: 350px;">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <InputText class="form-control" @bind-Value="model.Nome" />
+                        <ValidationMessage For="@(() => model.Nome)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sobrenome</label>
+                        <InputText class="form-control" @bind-Value="model.Sobrenome" />
+                        <ValidationMessage For="@(() => model.Sobrenome)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText class="form-control" type="email" @bind-Value="model.Email" />
+                        <ValidationMessage For="@(() => model.Email)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Senha</label>
+                        <InputText class="form-control" type="password" @bind-Value="model.Senha" />
+                        <ValidationMessage For="@(() => model.Senha)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">CPF</label>
+                        <InputText class="form-control" @bind-Value="model.Cpf" />
+                        <ValidationMessage For="@(() => model.Cpf)" />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <InputCheckbox class="form-check-input" @bind-Value="model.ManterConectado" />
+                        <label class="form-check-label">Mantenha-se conectado</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        Sign
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+<style>
+
+</style>
