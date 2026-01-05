@@ -8,43 +8,58 @@
         Nav.NavigateTo("/SignUp");
     }
 }
-<div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
-    <div class="row">
-        <h1>GUSMÃO BRITTO</h1>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <form class="border border-1 rounded-3 p-2">
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Senha</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                    <label class="form-check-label" for="exampleCheck1">Mantenha-se conectado</label>
-                </div>
-                <button type="submit" class="btn btn-primary">Login</button>
 
-                <ul>
-                    <li>
-                        <span>
-                            Não tem conta? <a href="/SignUp" class="btn btn-link"
-                                                   @onclick="RedirectToSignUp"
-                                                   @onclick:preventDefault>
-                                cadastre-se
-                            </a>
-                        </span>
-                    </li>
-                    <li><span><a>Esqueci minha senha</a></span></li>
-                </ul>               
-            </form>
+<div class="container-fluid" id="container-login">
+    <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
+        <div class="row">
+            <h1>GUSMÃO BRITTO</h1>
+        </div>
+        <div class="row align-items-center justify-content-center p-2 w-75  rounded-end-4 border border-start-0 border-top-0 border-bottom-0">
+            <div class="col-12 col-lg-6">
+                <div class="rounded-start-4" id="img-login">
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <form class="d-flex justify-content-between flex-column" id="form-card">
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                        <label for="exampleInputPassword1" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="exampleInputPassword1">
+                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                        <label class="form-check-label" for="exampleCheck1">Mantenha-se conectado</label>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                    <ul>
+                        <li>
+                            <span>
+                                Não tem conta? <a href="/SignUp" class="btn btn-link"
+                                                    @onclick="RedirectToSignUp"
+                                                    @onclick:preventDefault>
+                                    cadastre-se
+                                </a>
+                            </span>
+                        </li>
+                        <li><span><a>Esqueci minha senha</a></span></li>
+                    </ul>
+                </form>
+            </div>
         </div>
     </div>
+    
+   
 </div>
 <style>
-
+    #img-login{
+        min-width:350px;
+        min-height:400px;
+        background-image:url('images/Gusmão Frente.png') !important;
+        background-repeat:no-repeat;
+        background-size:cover;
+    }
+    #form-card{
+        backdrop-filter: blur(14px);
+    }
 </style>
