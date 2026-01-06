@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using ProjetoGusmaoFinal.Components;
 using ProjetoGusmaoFinal.Data;
+using ProjetoGusmaoFinal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddScoped(typeof(CRUDService<>));
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<HashService>();
 
 var app = builder.Build();
 

@@ -2,30 +2,52 @@
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager Nav
+@inject ProjetoGusmaoFinal.Services.UserService UserService
 @attribute [AllowAnonymous]
+@attribute [Microsoft.AspNetCore.Mvc.IgnoreAntiforgeryToken]
 
 @code {
-    private SignUpModel model = new();
-
-    private void HandleSubmit()
+    private string Sobrenome = "";
+    private bool Conectado = false;
+    private SignUpViewModel Model = new()
     {
-        
-        // Aqui o form já passou por validação
-        // Exemplo:
-        // - salvar no banco
-        // - criar usuário
-        // - redirecionar para login
+        Name = string.Empty,
+        Email = string.Empty,
+        Password = string.Empty,
+        CPF = string.Empty
+    };
+    private HashResponse PassHashed = new();
+    private async Task HandleSubmit()
+    {
+        PassHashed = HashService.Crypt(Model.Password);
+        if (PassHashed.Success) Model.Password = PassHashed.Hash;
 
-        Console.WriteLine("Cadastro válido");
+        if(Sobrenome != "") Model.Name += $@" {Sobrenome}";
+
+        Users NewUser = new()
+        {
+            Name = Model.Name,
+            Email = Model.Email,
+            Password = Model.Password,
+            CPF = Model.CPF
+        };
+        ApiResponse<Users> Response = await UserService.PostUser(NewUser);
+
+        if (Response.Success)
+        {
+            Console.WriteLine("Cadastro válido");
+        }
+        else
+        {
+            Console.WriteLine("Cadastro inválido");
+        }
     }
 
-    public class SignUpModel
+
+    public class SignUpViewModel
     {
         [Required(ErrorMessage = "Nome é obrigatório")]
-        public string Nome { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Sobrenome é obrigatório")]
-        public string Sobrenome { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email é obrigatório")]
         [EmailAddress(ErrorMessage = "Email inválido")]
@@ -33,19 +55,17 @@
 
         [Required(ErrorMessage = "Senha é obrigatória")]
         [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
-        public string Senha { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "CPF é obrigatório")]
-        public string Cpf { get; set; } = string.Empty;
-
-        public bool ManterConectado { get; set; }
+        public string CPF { get; set; } = string.Empty;
     }
+
 }
 
-<EditForm Model="@model" OnValidSubmit="HandleSubmit">
+<EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="sign-up-form">
     <DataAnnotationsValidator />
     <ValidationSummary />
-
     <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
         <div class="row">
             <h1>Cadastre-se</h1>
@@ -54,39 +74,37 @@
         <div class="row">
             <div class="col-12">
                 <div class="border border-1 rounded-3 p-3" style="min-width: 350px;">
-
                     <div class="mb-3">
                         <label class="form-label">Nome</label>
-                        <InputText class="form-control" @bind-Value="model.Nome" />
-                        <ValidationMessage For="@(() => model.Nome)" />
+                        <InputText class="form-control" @bind-Value="Model.Name" />
+                        <ValidationMessage For="@(() => Model.Name)" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Sobrenome</label>
-                        <InputText class="form-control" @bind-Value="model.Sobrenome" />
-                        <ValidationMessage For="@(() => model.Sobrenome)" />
+                        <input type="text" class="form-control" @bind-value="Sobrenome" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <InputText class="form-control" type="email" @bind-Value="model.Email" />
-                        <ValidationMessage For="@(() => model.Email)" />
+                        <InputText class="form-control" type="email" @bind-Value="Model.Email" />
+                        <ValidationMessage For="@(() => Model.Email)" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Senha</label>
-                        <InputText class="form-control" type="password" @bind-Value="model.Senha" />
-                        <ValidationMessage For="@(() => model.Senha)" />
+                        <InputText class="form-control" type="password" @bind-Value="Model.Password" />
+                        <ValidationMessage For="@(() => Model.Password)" />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">CPF</label>
-                        <InputText class="form-control" @bind-Value="model.Cpf" />
-                        <ValidationMessage For="@(() => model.Cpf)" />
+                        <InputText class="form-control" @bind-Value="Model.CPF" />
+                        <ValidationMessage For="@(() => Model.CPF)" />
                     </div>
 
                     <div class="mb-3 form-check">
-                        <InputCheckbox class="form-check-input" @bind-Value="model.ManterConectado" />
+                        <input type="checkbox" class="form-check-input" @bind-value="Conectado"/>
                         <label class="form-check-label">Mantenha-se conectado</label>
                     </div>
 
