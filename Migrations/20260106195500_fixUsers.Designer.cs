@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjetoGusmaoFinal.Data;
 
@@ -11,9 +12,11 @@ using ProjetoGusmaoFinal.Data;
 namespace ProjetoGusmaoFinal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260106195500_fixUsers")]
+    partial class fixUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -219,9 +222,6 @@ namespace ProjetoGusmaoFinal.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("Password");
 
-                    b.Property<int>("RoleID")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CPF")
@@ -229,8 +229,6 @@ namespace ProjetoGusmaoFinal.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("RoleID");
 
                     b.ToTable("Users");
                 });
@@ -268,7 +266,7 @@ namespace ProjetoGusmaoFinal.Migrations
             modelBuilder.Entity("ProjetoGusmaoFinal.Models.News", b =>
                 {
                     b.HasOne("ProjetoGusmaoFinal.Models.Users", "User")
-                        .WithMany("News")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -287,17 +285,6 @@ namespace ProjetoGusmaoFinal.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ProjetoGusmaoFinal.Models.Users", b =>
-                {
-                    b.HasOne("ProjetoGusmaoFinal.Models.Roles", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("ProjetoGusmaoFinal.Models.Books", b =>
                 {
                     b.Navigation("BookCategories");
@@ -311,11 +298,6 @@ namespace ProjetoGusmaoFinal.Migrations
             modelBuilder.Entity("ProjetoGusmaoFinal.Models.Publisher", b =>
                 {
                     b.Navigation("Books");
-                });
-
-            modelBuilder.Entity("ProjetoGusmaoFinal.Models.Users", b =>
-                {
-                    b.Navigation("News");
                 });
 #pragma warning restore 612, 618
         }
