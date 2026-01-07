@@ -3,10 +3,9 @@
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager Nav
 @inject ProjetoGusmaoFinal.Services.UserService UserService
+@inject ProjetoGusmaoFinal.Services.ToastService ToastService
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
-
-<ProjetoGusmaoFinal.Components.Toasts.DefaultToast Success=@Success Message=@Message TimeActived="2000" />
 
 <EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="SignUpForm">
     <DataAnnotationsValidator />
@@ -106,15 +105,24 @@
         {
             Success = true;
             Message = "Operação realizada com sucesso!";
+            await ToastService.Show(
+                "Operação realizada com sucesso!",
+                true
+            );
+
+            Nav.NavigateTo("/Login");
+
         }
         else
         {
             Success = false;
             Message = "Ocorreu um erro ao processar a ação.";
+            await ToastService.Show(
+                "Operação realizada com ERRo!",
+                true
+            );
+            Nav.NavigateTo("/Login");
         }
-
-        // Força atualização da UI
-        StateHasChanged();
     }
 
     public class SignUpViewModel
