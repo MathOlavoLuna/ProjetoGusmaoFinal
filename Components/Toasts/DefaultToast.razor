@@ -1,0 +1,34 @@
+﻿@if (!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="toast-alert @(Success ? "toast-success" : "toast-error")" style="display: block;">
+        <strong>@(Success ? "Sucesso" : "Erro")</strong>
+        <span>@Message</span>
+    </div>
+}
+
+@code {
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public bool Success { get; set; }
+    [Parameter] public int TimeActived { get; set; } = 2000;
+
+    private bool shouldShow = false;
+    private string lastMessage = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Debug: imprime no console
+        Console.WriteLine($"Toast - Message: {Message}, Success: {Success}");
+
+        if (!string.IsNullOrWhiteSpace(Message) && Message != lastMessage)
+        {
+            lastMessage = Message;
+            shouldShow = true;
+            StateHasChanged();
+
+            await Task.Delay(TimeActived);
+
+            shouldShow = false;
+            StateHasChanged();
+        }
+    }
+}

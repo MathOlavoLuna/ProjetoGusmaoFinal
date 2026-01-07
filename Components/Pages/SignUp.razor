@@ -6,62 +6,7 @@
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
-@code {
-    [SupplyParameterFromForm]
-    private SignUpViewModel Model { get; set; } = new();
-    
-    [SupplyParameterFromForm]
-    private string Sobrenome { get; set; } = "";
-    
-    [SupplyParameterFromForm]
-    private bool Conectado { get; set; } = false;
-    
-    private HashResponse PassHashed = new();
-    
-    private async Task HandleSubmit()
-    {
-        PassHashed = HashService.Crypt(Model.Password);
-        if (PassHashed.Success) Model.Password = PassHashed.Hash;
-
-        if(Sobrenome != "") Model.Name += $@" {Sobrenome}";
-
-        Users NewUser = new()
-        {
-            Name = Model.Name,
-            Email = Model.Email,
-            Password = Model.Password,
-            CPF = Model.CPF
-        };
-        
-        ApiResponse<Users> Response = await UserService.PostUser(NewUser);
-
-        if (Response.Success)
-        {
-            Console.WriteLine("Cadastro válido");
-        }
-        else
-        {
-            Console.WriteLine("Cadastro inválido");
-        }
-    }
-
-    public class SignUpViewModel
-    {
-        [Required(ErrorMessage = "Nome é obrigatório")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Email é obrigatório")]
-        [EmailAddress(ErrorMessage = "Email inválido")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Senha é obrigatória")]
-        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
-        public string Password { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "CPF é obrigatório")]
-        public string CPF { get; set; } = string.Empty;
-    }
-}
+<ProjetoGusmaoFinal.Components.Toasts.DefaultToast Success=@Success Message=@Message TimeActived="2000" />
 
 <EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="SignUpForm">
     <DataAnnotationsValidator />
@@ -104,15 +49,88 @@
                     </div>
 
                     <div class="mb-3 form-check">
-                        <InputCheckbox class="form-check-input" @bind-Value="Conectado"/>
+                        <InputCheckbox class="form-check-input" @bind-Value="Conectado" />
                         <label class="form-check-label">Mantenha-se conectado</label>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">
-                        Sign
+                        Cadastrar
                     </button>
                 </div>
             </div>
         </div>
     </div>
 </EditForm>
+
+@code {
+    // Toast Parameters Section
+    private string Message = string.Empty;
+    private bool Success = false;
+
+    [SupplyParameterFromForm]
+    private SignUpViewModel Model { get; set; } = new();
+
+    [SupplyParameterFromForm]
+    private string Sobrenome { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    private bool Conectado { get; set; } = false;
+
+    private HashResponse PassHashed = new();
+
+    private async Task HandleSubmit()
+    {
+        // Limpa mensagens anteriores
+        Message = string.Empty;
+        StateHasChanged();
+
+        PassHashed = HashService.Crypt(Model.Password);
+        if (PassHashed.Success) Model.Password = PassHashed.Hash;
+
+        if (!string.IsNullOrWhiteSpace(Sobrenome))
+        {
+            Model.Name += $" {Sobrenome}";
+        }
+
+        Users NewUser = new()
+        {
+            Name = Model.Name,
+            Email = Model.Email,
+            Password = Model.Password,
+            CPF = Model.CPF
+        };
+
+        ApiResponse<Users> Response = await UserService.PostUser(NewUser);
+
+        if (Response.Success)
+        {
+            Success = true;
+            Message = "Operação realizada com sucesso!";
+        }
+        else
+        {
+            Success = false;
+            Message = "Ocorreu um erro ao processar a ação.";
+        }
+
+        // Força atualização da UI
+        StateHasChanged();
+    }
+
+    public class SignUpViewModel
+    {
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Senha é obrigatória")]
+        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "CPF é obrigatório")]
+        public string CPF { get; set; } = string.Empty;
+    }
+}

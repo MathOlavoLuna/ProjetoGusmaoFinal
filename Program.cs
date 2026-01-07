@@ -6,6 +6,7 @@ using ProjetoGusmaoFinal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddBlazorBootstrap();
 var serverVersion = new MariaDbServerVersion(new Version(12, 0, 2));
 
 builder.Services.AddRazorComponents()
