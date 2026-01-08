@@ -1,20 +1,4 @@
-﻿@using ProjetoGusmaoFinal.Components.Toasts
+﻿
 @inherits LayoutComponentBase
 
 @Body
-@inject ToastService ToastService
-
-@if (!string.IsNullOrWhiteSpace(ToastService.Message))
-{
-    <DefaultToast
-        Message="@ToastService.Message"
-        Success="@ToastService.Success"
-        TimeActived="2000" />
-}
-
-@code {
-    protected override void OnInitialized()
-    {
-        ToastService.OnChange += StateHasChanged;
-    }
-}

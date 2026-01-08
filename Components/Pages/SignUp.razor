@@ -3,13 +3,11 @@
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager Nav
 @inject ProjetoGusmaoFinal.Services.UserService UserService
-@inject ProjetoGusmaoFinal.Services.ToastService ToastService
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
 <EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="SignUpForm">
     <DataAnnotationsValidator />
-    <ValidationSummary />
     <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
         <div class="row">
             <h1>Cadastre-se</h1>
@@ -40,6 +38,11 @@
                         <InputText class="form-control" type="password" @bind-Value="Model.Password" />
                         <ValidationMessage For="@(() => Model.Password)" />
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmação Senha</label>
+                        <InputText class="form-control" type="password" @bind-Value="Model.ConfirmPassword"/>
+                        <ValidationMessage For="@(() => Model.ConfirmPassword)" />
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label">CPF</label>
@@ -62,10 +65,6 @@
 </EditForm>
 
 @code {
-    // Toast Parameters Section
-    private string Message = string.Empty;
-    private bool Success = false;
-
     [SupplyParameterFromForm]
     private SignUpViewModel Model { get; set; } = new();
 
@@ -79,18 +78,6 @@
 
     private async Task HandleSubmit()
     {
-        // Limpa mensagens anteriores
-        Message = string.Empty;
-        StateHasChanged();
-
-        PassHashed = HashService.Crypt(Model.Password);
-        if (PassHashed.Success) Model.Password = PassHashed.Hash;
-
-        if (!string.IsNullOrWhiteSpace(Sobrenome))
-        {
-            Model.Name += $" {Sobrenome}";
-        }
-
         Users NewUser = new()
         {
             Name = Model.Name,
@@ -99,29 +86,18 @@
             CPF = Model.CPF
         };
 
+        PassHashed = HashService.Crypt(Model.Password);
+        if (PassHashed.Success) NewUser.Password = PassHashed.Hash;
+
+        if (!string.IsNullOrWhiteSpace(Sobrenome))
+        {
+            NewUser.Name += $" {Sobrenome}";
+        }
         ApiResponse<Users> Response = await UserService.PostUser(NewUser);
 
         if (Response.Success)
         {
-            Success = true;
-            Message = "Operação realizada com sucesso!";
-            await ToastService.Show(
-                "Operação realizada com sucesso!",
-                true
-            );
-
-            Nav.NavigateTo("/Login");
-
-        }
-        else
-        {
-            Success = false;
-            Message = "Ocorreu um erro ao processar a ação.";
-            await ToastService.Show(
-                "Operação realizada com ERRo!",
-                true
-            );
-            Nav.NavigateTo("/Login");
+            Nav.NavigateTo("Login");
         }
     }
 
@@ -137,6 +113,11 @@
         [Required(ErrorMessage = "Senha é obrigatória")]
         [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
         public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Senha é obrigatória")]
+        [Compare(nameof(Password), ErrorMessage = "As senhas não coincidem")]
+        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
+        public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "CPF é obrigatório")]
         public string CPF { get; set; } = string.Empty;

@@ -12,6 +12,12 @@
     z-index: 9999;
 }
 
+.toast-show{
+    opacity:1 !important; 
+}
+.toast-nshow {
+    opacity: 0 !important;
+}
 .toast-success {
     background-color: #198754;
 }

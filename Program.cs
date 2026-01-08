@@ -30,7 +30,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddScoped(typeof(CRUDService<>));
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<HashService>();
 
 var app = builder.Build();
