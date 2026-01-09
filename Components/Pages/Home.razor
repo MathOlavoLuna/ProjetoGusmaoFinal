@@ -4,23 +4,10 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 @page "/"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "DEFAULT ROLE")]
 @code {
 
 }
-
-<!DOCTYPE html>
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="home.css" />
-    <link rel="stylesheet" href="ProjetoGusmaoFinal.styles.css" />
-    <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css" />
-    <HeadOutlet />
-</head>
-
 <body>
     <div class="container-fluid p-0">
         <Header></Header>
@@ -31,7 +18,7 @@
             <div class="row">
                 <div class="col-12 mt-4">
                     <div class="home-text-values">
-                        Somos conhecidos
+                        Somos conhecidos 
                     </div>
                     <div class="home-text-values">
                         pelos nossos fortes valores

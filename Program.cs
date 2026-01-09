@@ -6,7 +6,6 @@ using ProjetoGusmaoFinal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddBlazorBootstrap();
 var serverVersion = new MariaDbServerVersion(new Version(12, 0, 2));
 
 builder.Services.AddRazorComponents()
@@ -20,8 +19,8 @@ builder.Services.AddDbContext<DataContext>(options =>
 );
 
     
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
     {
         options.LoginPath = "/login";
         options.AccessDeniedPath = "/acesso-negado";
