@@ -8,39 +8,69 @@
 @attribute [AllowAnonymous]
 @inject NavigationManager Nav
 
-@code{
+@code {
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
+
     [SupplyParameterFromForm]
     private LoginForm Model { get; set; } = new();
+
     void RedirectToSignUp()
     {
         Nav.NavigateTo("/SignUp");
     }
 
-    private async Task HandleLogin()
+    private async Task HandleLogin(EditContext editContext)
     {
-        ApiResponse<Users> Response = await _userService.GetUser(Model.Email, Model.Password);
-        if (Response.Success)
+        try
         {
-            List<Claim> claims = new()
+            ApiResponse<Users> Response = await _userService.GetUser(Model.Email, Model.Password);
+            if (Response.Success)
             {
-                new Claim(ClaimTypes.Name, Response.Data[0].Name),
-                new Claim(ClaimTypes.Role, Response.Data[0].Role?.Name ?? "DEFAULT ROLE")
-            };
+                List<Claim> claims = new()
+                {
+                    new Claim(ClaimTypes.Name, Response.Data[0].Name),
+                    new Claim(ClaimTypes.Role, Response.Data[0].Role?.Name ?? "DEFAULT ROLE")
+                };
 
-            ClaimsIdentity claimsIdentity = new(claims, "CookieAuth");
-            ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
+                ClaimsIdentity claimsIdentity = new(claims, "CookieAuth");
+                ClaimsPrincipal claimsPrincipal = new(claimsIdentity);
 
-            await HttpContext!.SignInAsync("CookieAuth", claimsPrincipal);
+                await HttpContext!.SignInAsync("CookieAuth", claimsPrincipal);
 
+                Nav.NavigateTo("/");
+            }
+            else
+            {
+                var messageStore = new ValidationMessageStore(editContext);
+
+                if (Response.Message.Contains("Senha"))
+                {
+                    messageStore.Add(editContext.Field(nameof(Model.Password)), Response.Message);
+                }
+                else
+                {
+                    messageStore.Add(editContext.Field(nameof(Model.Email)), Response.Message);
+                }
+
+                editContext.NotifyValidationStateChanged();
+            }
+        }
+        catch (NavigationException)
+        {
             Nav.NavigateTo("/", true);
+        }
+        catch (Exception)
+        {
+            var messageStore = new ValidationMessageStore(editContext);
+            messageStore.Add(editContext.Field(nameof(Model.Email)), "Erro ao fazer login. Tente novamente.");
+            editContext.NotifyValidationStateChanged();
         }
     }
 
     public class LoginForm
     {
-        [Required(ErrorMessage = "Email é obrigatória")]
+        [Required(ErrorMessage = "Email é obrigatório")]
         public string Email { get; set; } = string.Empty;
         [Required(ErrorMessage = "Senha é obrigatória")]
         public string Password { get; set; } = string.Empty;
@@ -59,19 +89,19 @@
             </div>
             <div class="col-12 col-lg-6">
                 <EditForm Model="@Model" class="d-flex justify-content-between flex-column" FormName="LoginForm" OnValidSubmit="HandleLogin">
-                <DataAnnotationsValidator />
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <InputText class="form-control" type="email" @bind-Value="Model.Email" />
-                    <ValidationMessage For="@(() => Model.Email)" />
-                </div>
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText class="form-control" type="email" @bind-Value="Model.Email" />
+                        <ValidationMessage For="@(() => Model.Email)" />
+                    </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Senha</label>
-                    <InputText class="form-control" type="password" @bind-Value="Model.Password" />
-                    <ValidationMessage For="@(() => Model.Password)" />
-                </div>
-                        <label class="form-check-label" for="exampleCheck1">Mantenha-se conectado</label>
+                    <div class="mb-3">
+                        <label class="form-label">Senha</label>
+                        <InputText class="form-control" type="password" @bind-Value="Model.Password" />
+                        <ValidationMessage For="@(() => Model.Password)" />
+                    </div>
+                            <label class="form-check-label" for="exampleCheck1">Mantenha-se conectado</label>
                     
                     <div class="mb-3">
                         <button class="btn btn-primary">Login</button>
