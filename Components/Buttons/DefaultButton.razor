@@ -10,7 +10,7 @@
     [Parameter]
     public bool ButtonShadow { get; set; } = false;
     [Parameter]
-    public string ButtonImage { get; set; } = string.Empty;
+    public string ButtonUrlImage { get; set; } = string.Empty;
     [Parameter]
     public EventCallback OnClick { get; set; }
     [Parameter]
@@ -32,11 +32,11 @@
 
 }
 
-<button class="py-1 border-0 rounded-3 px-3 d-flex align-items-center justify-content-center"
-style="
-    color: @ButtonTextColor;
-    background-color: @ButtonColor;
-    width:130px;
-    text-wrap: nowrap;"
-@onclick="HandleClick"
->@ButtonText</button>
+<button class="py-1 navbar-option-scrollY border-0 rounded-3 px-3 d-flex align-items-center justify-content-center" style="text-wrap: nowrap; background-color: @ButtonColor; color: @ButtonTextColor;" @onclick="HandleClick" >
+    @if (!String.IsNullOrEmpty(ButtonUrlImage))
+    {
+        <img src="@ButtonUrlImage"/>
+    }
+    <div>
+    @ButtonText</div>
+</button>

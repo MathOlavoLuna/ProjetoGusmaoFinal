@@ -58,7 +58,7 @@
         const NavBarTitle = document.getElementById('navbar-title');
 
         // Verifica se está na página de Matrícula
-        const isMatriculaPage = () => window.location.pathname.includes('/Matricula');
+        const isMatriculaPage = () => window.location.pathname.includes('/Matricula' || '/Noticia');
 
         window.navbarScrollHandler = function() {
             if (isMatriculaPage()) {

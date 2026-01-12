@@ -1,0 +1,43 @@
+﻿@page "/Noticia"
+
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Nav
+@inject ProjetoGusmaoFinal.Services.UserService UserService
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
+<EditForm Model="@Model"  FormName="NewsCreate">
+    <DataAnnotationsValidator />
+    <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
+       <div class="row w-100">
+           <div class="col-12">
+              
+                    <div class="row justify-content-between border-1 rounded-4 border-black">
+                        <div class="w-50">Criar Nóticia</div> <button class="w-25">Criar</button>
+                    </div>
+                    <div class="row">
+                        <InputText class="form-control" type="text" @bind-Value="Model.Title" />
+                        <InputText class="form-control" type="text" @bind-Value="Model.ConteudoEscrito" />
+                    </div>
+              
+           </div>
+       </div>
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private NewsCreate Model { get; set; } = new();
+
+    private class NewsCreate
+    {
+        public string Title { get; set; } = string.Empty;
+        public string ConteudoEscrito { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int UserId { get; set; }
+    }
+}
+@code {
+
+}
