@@ -61,6 +61,9 @@
 </EditForm>
 
 @code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
     [SupplyParameterFromForm]
     private SignUpViewModel Model { get; set; } = new();
 

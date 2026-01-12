@@ -4,7 +4,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 @page "/"
-@attribute [Authorize(Roles = "DEFAULT ROLE")]
+@attribute [Authorize]
 @code {
 
     [CascadingParameter]
