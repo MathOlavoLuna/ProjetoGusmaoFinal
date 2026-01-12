@@ -7,25 +7,22 @@
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
-<EditForm Model="@Model"  FormName="NewsCreate">
-    <DataAnnotationsValidator />
-    <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
-       <div class="row w-100">
-           <div class="col-12">
-              
-                    <div class="row justify-content-between border-1 rounded-4 border-black">
-                        <div class="w-50">Criar Nóticia</div> <button class="w-25">Criar</button>
-                    </div>
-                    <div class="row">
-                        <InputText class="form-control" type="text" @bind-Value="Model.Title" />
-                        <InputText class="form-control" type="text" @bind-Value="Model.ConteudoEscrito" />
-                    </div>
-              
-           </div>
-       </div>
-    </div>
-</EditForm>
-
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <EditForm Model="@Model" FormName="NewsCreate" class="w-100 d-flex justify-content-center">
+        <DataAnnotationsValidator />
+        <div class="row w-50 border border-1 rounded-4 border-black p-2 justify-content-center">
+            <div class="row justify-content-between">
+                <div class="w-50">Criar Nóticia</div> <button class="w-25">Criar</button>
+            </div>
+            <div class="row gap-1">
+                <label class="form-label" for="Titulo">Título</label>
+                <InputText id="Titulo" class="form-control m-0" type="text" @bind-Value="Model.Title" />
+                <label class="form-label" for="Conteudo">Conteúdo</label>
+                <InputTextArea id="Conteudo"  class="form-control" @bind-Value ="Model.ConteudoEscrito" style="max-height:200px; height:200px;"></InputTextArea>
+            </div>
+        </div>
+    </EditForm>
+</div>
 @code {
     [SupplyParameterFromForm]
     private NewsCreate Model { get; set; } = new();
