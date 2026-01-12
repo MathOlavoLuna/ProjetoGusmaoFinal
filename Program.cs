@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using ProjetoGusmaoFinal.Components;
@@ -30,7 +31,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped(typeof(CRUDService<>));
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<HashService>();
-
+builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 // Pipeline
@@ -47,7 +49,17 @@ app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync("CookieAuth");
+    context.Response.Redirect("/Login");
+    return Results.Empty;
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+// Program.cs
+
 app.Run();
+

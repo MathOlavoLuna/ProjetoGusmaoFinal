@@ -5,15 +5,44 @@
     background-color: #1054E2;
 }
 .navbar-option {
+    cursor: pointer;
     background-color: #1054E2;
+    transition: all 0.4s ease;
+    font-size: 1.05rem !important;
 }
+
+    .navbar-option:focus {
+        box-shadow: rgba(16, 84, 226, 0.4) 0 0 0 1.5px inset, rgba(16, 84, 226, 0.5) 0 2px 4px, rgba(16, 84, 226, 0.4) 0 7px 13px -3px, rgba(255, 255, 255, 0.3) 0 -3px 0 inset;
+    }
+
+    .navbar-option:hover {
+        box-shadow: rgba(16, 84, 226, 0.4) 0 4px 8px, rgba(16, 84, 226, 0.3) 0 7px 13px -3px, rgba(255, 255, 255, 0.2) 0 -3px 0 inset;
+        transform: translateY(-2px);
+        background-color: #1565f5;
+    }
+
+    .navbar-option:active {
+        box-shadow: rgba(16, 84, 226, 0.5) 0 3px 7px inset;
+        transform: translateY(2px);
+    }
 
 .navbar-option-scrollY {
-    background-color: #EAC556;
+    font-size: 1.05rem !important;
+    cursor: pointer !important;
+    background-color: #EAC556 !important;
+    transition: all 0.4s ease !important;
+    color: #FFF !important;
 }
+    .navbar-option-scrollY:hover {
+        box-shadow: rgba(234, 197, 86, 0.45) 0 6px 12px, rgba(234, 197, 86, 0.3) 0 10px 20px -3px, rgba(255, 255, 255, 0.15) 0 -3px 0 inset !important;
+        transform: translateY(-3px) !important;
+        background-color: #F1D36B !important; /* amarelo mais frio */
+        filter: brightness(0.90) !important;
+    }
+
 
 .header-navbar-scroll {
-    background-color: #1054e2 !important;
+    background-color: #0f085e !important;
 }
 
 .navbar-title-scrollY{

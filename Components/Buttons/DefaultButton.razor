@@ -1,4 +1,5 @@
-﻿
+﻿@inject NavigationManager Nav
+@rendermode InteractiveServer
 @code {
     [Parameter]
     public string ButtonText { get; set; } = string.Empty;
@@ -10,6 +11,25 @@
     public bool ButtonShadow { get; set; } = false;
     [Parameter]
     public string ButtonImage { get; set; } = string.Empty;
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+    [Parameter]
+    public string? NavigateUrl { get; set; }
+
+    private async Task HandleClick()
+    {
+        // Se tiver EventCallback, executa ele
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+        // Senão, se tiver URL, navega
+        else if (!string.IsNullOrEmpty(NavigateUrl))
+        {
+            Nav.NavigateTo(NavigateUrl);
+        }
+    }
+
 }
 
 <button class="py-1 border-0 rounded-3 px-3 d-flex align-items-center justify-content-center"
@@ -18,4 +38,5 @@ style="
     background-color: @ButtonColor;
     width:130px;
     text-wrap: nowrap;"
+@onclick="HandleClick"
 >@ButtonText</button>

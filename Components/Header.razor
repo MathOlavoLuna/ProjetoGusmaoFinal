@@ -1,35 +1,81 @@
-﻿<link href="header.css" rel="stylesheet" />
+﻿@rendermode InteractiveServer
+@inject NavigationManager Nav
 
+@code {
+    private void HandleLogout()
+    {
+        Nav.NavigateTo("/logout", true);
+    }
+}
+
+<link href="header.css" rel="stylesheet" />
 <div class="row p-4 header-navbar bg-white position-fixed w-100 text-white m-0 ">
     <div class="col-12 d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
-            <img class="navbar-logo" src="images/LogoGusmão.png" /> @*IMAGEM LOGO*@
+            <img class="navbar-logo" src="images/LogoGusmão.png" />
             <span class="text-dark fs-4" style="font-weight:700;" id="navbar-title">GUSMÃO</span>
         </div>
         <div class="d-flex gap-3">
-            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">HOME</span>
-            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">NÓTICIAS</span>
-            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">FUNDAMENTAL</span>
-            <span class="py-1 border-1 rounded-3 px-3 navbar-option d-flex align-items-center justify-content-center">ENSINO MÉDIO</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option navbar-option-class d-flex align-items-center justify-content-center">HOME</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option navbar-option-class d-flex align-items-center justify-content-center">NÓTICIAS</span>
+            <span class="py-1 border-1 rounded-3 px-3 navbar-option navbar-option-class d-flex align-items-center justify-content-center">MATRÍCULA</span>
         </div>
+        <button type="button" @onclick="HandleLogout" class="py-1 border-1 rounded-3 px-3 navbar-option navbar-option-class d-flex align-items-center justify-content-center">SAIR</button>
     </div>
 </div>
 
 <style>
-    .header-navbar{
+    .header-navbar {
         z-index: 9999;
         animation: ease-in-out;
         transition: 0.9s;
     }
 </style>
+
 <script>
-    window.addEventListener('scroll', ()=>{
+    (function() {
         const NavBar = document.querySelector('.header-navbar');
-        if(window.scrollY > 350){
-            NavBar.classList.add('header-navbar-scroll');
-        }else if(window.scrollY < 350){
-            NavBar.classList.remove('header-navbar-scroll');
-        }
-    })
+        const NavBarButtons = document.getElementsByClassName('navbar-option-class');
+        const NavBarTitle = document.getElementById('navbar-title');
+
+        // Verifica se está na página de Matrícula
+        const isMatriculaPage = () => window.location.pathname.includes('/Matricula');
+
+        window.addEventListener('scroll', () => {
+
+            if (isMatriculaPage()) {
+                for (let i = 0; i < NavBarButtons.length; i++) {
+                    NavBarButtons[i].classList.add('navbar-option');
+                    NavBarButtons[i].classList.remove('navbar-option-scrollY');
+                }
+                NavBarTitle.classList.remove('navbar-title-scrollY');
+                return;
+            } else {
+                // Lógica do background do navbar
+                if (window.scrollY > 350) {
+                    NavBar.classList.add('header-navbar-scroll');
+                } else {
+                    NavBar.classList.remove('header-navbar-scroll');
+                }
+
+                // Se estiver na página de Matrícula, mantém os estilos padrão
+
+
+                // Lógica normal para outras páginas
+                for (let i = 0; i < NavBarButtons.length; i++) {
+                    const Btn = NavBarButtons[i];
+
+                    if (window.scrollY > 350) {
+                        NavBarTitle.classList.add('navbar-title-scrollY');
+                        Btn.classList.remove('navbar-option');
+                        Btn.classList.add('navbar-option-scrollY');
+                    } else {
+                        Btn.classList.add('navbar-option');
+                        Btn.classList.remove('navbar-option-scrollY');
+                        NavBarTitle.classList.remove('navbar-title-scrollY');
+                    }
+                }
+            }
+        });
+    })();
 </script>
-<script src="js/Header.js"></script>

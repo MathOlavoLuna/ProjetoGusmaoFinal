@@ -30,6 +30,18 @@ namespace ProjetoGusmaoFinal.Services
             }
             return Response;
         }
+        public async Task<int> GetUserId(string CPF)
+        {
+            try
+            {
+                Users FoundUser = await _context.Users.FirstOrDefaultAsync(u => CPF == u.CPF) ?? new();
+                return FoundUser.Id;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
         public async Task<ApiResponse<Users>> PostUser(Users User)
         {
             ApiResponse<Users> Response = new();

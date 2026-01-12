@@ -1,0 +1,129 @@
+﻿@page "/Matricula"
+
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Nav
+@inject ProjetoGusmaoFinal.Services.UserService UserService
+@inject ProjetoGusmaoFinal.Services.RegistrationService RegistratioService
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
+<EditForm Model="@Model" OnValidSubmit="HandleSubmit" FormName="SignUpForm">
+    <DataAnnotationsValidator />
+    <div class="container d-flex justify-content-evenly align-items-center min-vh-100 flex-column">
+        <div class="row mt-5">
+            <h1>Matricule-se</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="border border-1 rounded-3 p-3" style="min-width: 350px;">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do aluno(a)</label>
+                        <InputText class="form-control" @bind-Value="Model.Name" />
+                        <ValidationMessage For="@(() => Model.Name)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sobrenome do aluno(a)</label>
+                        <InputText class="form-control" @bind-Value="Sobrenome" />
+                        <ValidationMessage For="@(() => Sobrenome)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email para contato</label>
+                        <InputText class="form-control" type="email" @bind-Value="Model.Email" />
+                        <ValidationMessage For="@(() => Model.Email)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Classe Designada</label>
+                        <InputText class="form-control"  @bind-Value="Model.ClasseDesignado" />
+                        <ValidationMessage For="@(() => Model.ClasseDesignado)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CPF</label>
+                        <InputText class="form-control" @bind-Value="Model.CPF" />
+                        <ValidationMessage For="@(() => Model.CPF)" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comprovante Residencial</label>
+                        <InputFile class="form-control" @bind-Value="Model.CPF" accept=".pdf, .jpeg, .png"/>
+                        <ValidationMessage For="@(() => Model.CPF)" />
+                        <span style="font-size:0.8rem;">(apenas arquivos .pdf, e imagens .jpeg, .png)</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        Cadastrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private SignUpViewModel Model { get; set; } = new();
+
+    [SupplyParameterFromForm]
+    private string Sobrenome { get; set; } = string.Empty;
+
+    [SupplyParameterFromForm]
+    private bool Conectado { get; set; } = false;
+
+    private HashResponse PassHashed = new();
+
+    private async Task HandleSubmit()
+    {
+        Users NewUser = new()
+        {
+            Name = Model.Name,
+            Email = Model.Email,
+            Password = Model.Password,
+            CPF = Model.CPF
+        };
+
+        PassHashed = HashService.Crypt(Model.Password);
+        if (PassHashed.Success) NewUser.Password = PassHashed.Hash;
+
+        if (!string.IsNullOrWhiteSpace(Sobrenome))
+        {
+            NewUser.Name += $" {Sobrenome}";
+        }
+        ApiResponse<Users> Response = await UserService.PostUser(NewUser);
+
+        if (Response.Success)
+        {
+            Registrations NewRegistration = new()
+            {
+                CPF = NewUser.CPF,
+                ClassName = Model.ClasseDesignado,
+                CreatedAt = DateTime.Now,
+                UserId = await UserService.GetUserId(NewUser.CPF)
+            };  
+            ApiResponse<Registrations> ResponseTwo = await RegistratioService.PostRegistration(NewRegistration);
+
+            if (ResponseTwo.Success)
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+    }
+
+    public class SignUpViewModel
+    {
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Senha é obrigatória")]
+        [MinLength(6, ErrorMessage = "Senha deve ter no mínimo 6 caracteres")]
+        public string Password { get; set; } = "senhapadrao";
+
+        public string ClasseDesignado { get; set; } = string.Empty;
+        [Required(ErrorMessage = "CPF é obrigatório")]
+        public string CPF { get; set; } = string.Empty;
+    }
+}
