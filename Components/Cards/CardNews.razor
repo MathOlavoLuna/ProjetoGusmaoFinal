@@ -3,18 +3,17 @@
     public string UrlImage { get;set; } = string.Empty;
     [Parameter]
     public string SummaryText { get; set; } = string.Empty;
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
 }
 
 <div class="card border-1 card-news-container d-flex align-items-center">
     <div class="card-img">
         <img src="@UrlImage"/>
     </div>
-    <div class="card-body">
+    <div class="card-title">@Title</div>
+    <div class="card-body" style="max-height:298px; overflow-y: auto;">
         @SummaryText
-        Vivamus condimentum augue a gravida tincidunt. Proin 
-        gravida est eu suscipit aliquet. Pellentesque habitant morbi tristique senectus 
-        et netus et malesuada fames ac turpis egestas. Cras pretium tellus neque,
-        eget pulvinar tortor vehicula ut. Mauris vitae eleifend lorem, sit amet mattis 
     </div>
     <btn class="btn-info text-decoration-none card-news-button text-center">Saiba Mais</btn>
 </div>

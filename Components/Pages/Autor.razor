@@ -1,0 +1,160 @@
+﻿@page "/Publisher"
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject ProjetoGusmaoFinal.Services.PublisherService PublisherService
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <EditForm Model="@Model" FormName="PublisherCreate" OnValidSubmit="PostPublisher" class="w-100 d-flex justify-content-center">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row w-50 border border-1 rounded-4 border-black p-4 justify-content-center">
+            <div class="row justify-content-between mb-3">
+                <div class="col-6">
+                    <h3>Adicionar Autor/Editora</h3>
+                </div>
+                <div class="col-6 text-end">
+                    <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Criar
+                    </button>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ErrorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(SuccessMessage))
+            {
+                <div class="alert alert-success" role="alert">
+                    @SuccessMessage
+                </div>
+            }
+
+            <div class="row gap-3">
+                <!-- Nome do Autor/Editora -->
+                <div class="col-12">
+                    <label class="form-label" for="Name">Nome *</label>
+                    <InputText id="Name" class="form-control" type="text" @bind-Value="Model.Name"
+                               placeholder="Ex: J.K. Rowling ou Editora Companhia das Letras" />
+                    <ValidationMessage For="@(() => Model.Name)" />
+                </div>
+
+                <!-- Descrição -->
+                <div class="col-12">
+                    <label class="form-label" for="Description">Descrição</label>
+                    <InputTextArea id="Description" class="form-control" @bind-Value="Model.Description"
+                                   style="max-height:200px; height:200px;"
+                                   placeholder="Breve biografia do autor ou informações sobre a editora..."></InputTextArea>
+                    <ValidationMessage For="@(() => Model.Description)" />
+                    <small class="text-muted">Opcional - Informações adicionais sobre o autor ou editora</small>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private PublisherCreate Model { get; set; } = new();
+
+    private class PublisherCreate
+    {
+        [Required(ErrorMessage = "Nome obrigatório.")]
+        [StringLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres.")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "Descrição deve ter no máximo 500 caracteres.")]
+        public string? Description { get; set; }
+    }
+
+    private int UserId;
+    private string UserName = string.Empty;
+    private bool IsSubmitting = false;
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var User = AuthState.User;
+
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            var UserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(UserIdClaim))
+            {
+                UserId = int.Parse(UserIdClaim);
+                UserName = User.Identity.Name ?? string.Empty;
+            }
+        }
+    }
+
+    private async Task PostPublisher()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+        IsSubmitting = true;
+
+        try
+        {
+            Publisher NewPublisher = new()
+            {
+                Name = Model.Name,
+                Description = Model.Description
+            };
+
+            var Response = await PublisherService.PostPublisher(NewPublisher);
+
+            if (Response.Success)
+            {
+                SuccessMessage = "Autor/Editora criado com sucesso! Redirecionando...";
+                await Task.Delay(1500);
+                Nav.NavigateTo("/Book");
+            }
+            else
+            {
+                ErrorMessage = Response.Message;
+            }
+        }
+        catch (NavigationException)
+        {
+            Nav.NavigateTo("/Book", true);
+        }
+        catch (Exception Ex)
+        {
+            ErrorMessage = $"Erro ao criar autor/editora: {Ex.Message}";
+            Console.WriteLine($"Erro ao criar autor/editora: {Ex.Message}");
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/Book");
+    }
+}

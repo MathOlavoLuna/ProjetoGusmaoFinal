@@ -3,25 +3,145 @@ using ProjetoGusmaoFinal.Models;
 
 namespace ProjetoGusmaoFinal.Services
 {
-    public class CategoryService(CRUDService<Categories> Entity)
+    public class CategoryService
     {
-        private readonly CRUDService<Categories> _entity = Entity;
+        private readonly CRUDService<Category> _crudService;
 
-        public async Task<ApiResponse<Categories>> PostCategory(Categories Category)
+        public CategoryService(CRUDService<Category> CrudService)
         {
-            ApiResponse<Categories> Response = new();
+            _crudService = CrudService;
+        }
+
+        public async Task<ApiResponse<Category>> GetAllCategories()
+        {
             try
             {
-                Categories CreatedCategory = await _entity.Post(Category);
-                Response.Data.Add(CreatedCategory);
-                Response.Success = true;
+                var Categories = await _crudService.GetAll();
+
+                return new ApiResponse<Category>
+                {
+                    Success = true,
+                    Data = Categories
+                };
             }
             catch (Exception Ex)
             {
-                Response.Message = Ex.Message;
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Erro: {Ex.Message}"
+                };
             }
-            return Response;
         }
 
+        public async Task<ApiResponse<Category>> GetCategoryById(int Id)
+        {
+            try
+            {
+                var Category = await _crudService.Get(Id);
+
+                if (Category != null)
+                {
+                    return new ApiResponse<Category>
+                    {
+                        Success = true,
+                        Data = new List<Category> { Category }
+                    };
+                }
+
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = "Categoria não encontrada."
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Erro: {Ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ApiResponse<Category>> PostCategory(Category NewCategory)
+        {
+            try
+            {
+                var Result = await _crudService.Post(NewCategory);
+
+                return new ApiResponse<Category>
+                {
+                    Success = true,
+                    Message = "Categoria criada com sucesso!",
+                    Data = new List<Category> { Result }
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Erro: {Ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ApiResponse<Category>> UpdateCategory(Category Category)
+        {
+            try
+            {
+                var Result = await _crudService.Put(Category);
+
+                return new ApiResponse<Category>
+                {
+                    Success = true,
+                    Message = "Categoria atualizada com sucesso!",
+                    Data = new List<Category> { Result }
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Erro: {Ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ApiResponse<Category>> DeleteCategory(int Id)
+        {
+            try
+            {
+                var Category = await _crudService.Get(Id);
+
+                if (Category == null)
+                {
+                    return new ApiResponse<Category>
+                    {
+                        Success = false,
+                        Message = "Categoria não encontrada."
+                    };
+                }
+
+                await _crudService.Delete(Category);
+
+                return new ApiResponse<Category>
+                {
+                    Success = true,
+                    Message = "Categoria deletada com sucesso!"
+                };
+            }
+            catch (Exception Ex)
+            {
+                return new ApiResponse<Category>
+                {
+                    Success = false,
+                    Message = $"Erro: {Ex.Message}"
+                };
+            }
+        }
     }
 }

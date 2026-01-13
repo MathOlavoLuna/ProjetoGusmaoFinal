@@ -1,0 +1,461 @@
+﻿@page "/Book"
+@using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Forms
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject ProjetoGusmaoFinal.Services.BookService BookService
+@inject ProjetoGusmaoFinal.Services.PublisherService PublisherService
+@inject ProjetoGusmaoFinal.Services.CategoryService CategoryService
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100" style="padding-top: 8%;">
+    <EditForm Model="@Model" FormName="BookCreate" OnValidSubmit="PostBook" class="w-100 d-flex justify-content-center">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row w-75 border border-1 rounded-4 border-black p-4 justify-content-center">
+            <div class="row justify-content-between mb-3">
+                <div class="col-6">
+                    <h3>Adicionar Livro</h3>
+                </div>
+                <div class="col-6 text-end">
+                    <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Criar Livro
+                    </button>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    @ErrorMessage
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(SuccessMessage))
+            {
+                <div class="alert alert-success" role="alert">
+                    @SuccessMessage
+                </div>
+            }
+
+            <div class="row gap-3">
+                <!-- Nome do Livro -->
+                <div class="col-12">
+                    <label class="form-label" for="Name">Nome do Livro *</label>
+                    <InputText id="Name" class="form-control" type="text" @bind-Value="Model.Name" />
+                    <ValidationMessage For="@(() => Model.Name)" />
+                </div>
+
+                <!-- Autor/Editora -->
+                <div class="col-12">
+                    <label class="form-label" for="PublisherId">Autor/Editora *</label>
+                    <InputSelect id="PublisherId" class="form-control" @bind-Value="Model.PublisherId">
+                        <option value="0">Selecione um autor/editora</option>
+                        @foreach (var Publisher in Publishers)
+                        {
+                            <option value="@Publisher.Id">@Publisher.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Model.PublisherId)" />
+                    <small class="text-muted">
+                        <a href="#" @onclick="NavigateToCreatePublisher" @onclick:preventDefault class="text-decoration-none">
+                            + Adicionar novo autor/editora
+                        </a>
+                    </small>
+                </div>
+
+                <!-- Categorias -->
+                <div class="col-12">
+                    <label class="form-label">Categorias *</label>
+                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        @foreach (var Category in Categories)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                       value="@Category.Id"
+                                       id="category-@Category.Id"
+                                       @onchange="@((e) => ToggleCategory(Category.Id, (bool)e.Value!))" />
+                                <label class="form-check-label" for="category-@Category.Id">
+                                    @Category.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                    @if (SelectedCategoryIds.Count == 0)
+                    {
+                        <small class="text-danger">Selecione pelo menos uma categoria</small>
+                    }
+                    <small class="text-muted d-block mt-1">
+                        <a href="#" @onclick="NavigateToCreateCategory" @onclick:preventDefault class="text-decoration-none">
+                            + Adicionar nova categoria
+                        </a>
+                    </small>
+                </div>
+
+                <!-- Descrição -->
+                <div class="col-12">
+                    <label class="form-label" for="Description">Descrição</label>
+                    <InputTextArea id="Description" class="form-control" @bind-Value="Model.Description"
+                                   style="max-height:200px; height:200px;"
+                                   placeholder="Sinopse ou descrição do livro..."></InputTextArea>
+                    <ValidationMessage For="@(() => Model.Description)" />
+                </div>
+
+                <!-- URL da Capa -->
+                <div class="col-12">
+                    <label class="form-label" for="CoverImageUrl">URL da Capa do Livro</label>
+                    <InputText id="CoverImageUrl" class="form-control" type="url" @bind-Value="Model.CoverImageUrl"
+                               placeholder="https://exemplo.com/capa.jpg" />
+                    <ValidationMessage For="@(() => Model.CoverImageUrl)" />
+                    <small class="text-muted">Cole o link direto da imagem da capa</small>
+                </div>
+
+                <!-- Upload PDF -->
+                <div class="col-12">
+                    <label class="form-label" for="PdfFile">Arquivo PDF do Livro *</label>
+                    <InputFile id="PdfFile" class="form-control" OnChange="HandlePdfUpload" accept=".pdf" />
+                    <small class="text-muted">Máximo 50MB - O arquivo será armazenado no banco de dados</small>
+
+                    @if (IsUploading)
+                    {
+                        <div class="mt-2">
+                            <div class="spinner-border spinner-border-sm me-2"></div>
+                            <span>Processando PDF... (@UploadProgress%)</span>
+                        </div>
+                    }
+
+                    @if (PdfBytes != null)
+                    {
+                        <div class="alert alert-success mt-2">
+                            ✓ PDF carregado: @PdfFileName (@FormatFileSize(PdfFileSize))
+                        </div>
+                    }
+                </div>
+
+                <!-- Link Amazon -->
+                <div class="col-12">
+                    <label class="form-label" for="AmazonUrl">Link da Amazon (opcional)</label>
+                    <InputText id="AmazonUrl" class="form-control" type="url" @bind-Value="Model.AmazonUrl"
+                               placeholder="https://www.amazon.com.br/..." />
+                    <ValidationMessage For="@(() => Model.AmazonUrl)" />
+                    <small class="text-muted">Link para compra do livro físico na Amazon</small>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private BookCreate Model { get; set; } = new();
+
+    private class BookCreate
+    {
+        [Required(ErrorMessage = "Nome obrigatório.")]
+        [StringLength(200, ErrorMessage = "Nome deve ter no máximo 200 caracteres.")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(2000, ErrorMessage = "Descrição deve ter no máximo 2000 caracteres.")]
+        public string? Description { get; set; }
+
+        [Url(ErrorMessage = "URL da capa inválida.")]
+        public string? CoverImageUrl { get; set; }
+
+        [Url(ErrorMessage = "URL da Amazon inválida.")]
+        public string? AmazonUrl { get; set; }
+
+        [StringLength(20, ErrorMessage = "ISBN deve ter no máximo 20 caracteres.")]
+        public string? ISBN { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Selecione um autor/editora.")]
+        public int PublisherId { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+    }
+
+    private int UserId;
+    private string UserName = string.Empty;
+    private bool IsSubmitting = false;
+    private bool IsUploading = false;
+    private int UploadProgress = 0;
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+
+    private List<Publisher> Publishers = new();
+    private List<Category> Categories = new();
+    private List<int> SelectedCategoryIds = new();
+
+    // Dados do PDF
+    private byte[]? PdfBytes;
+    private string? PdfFileName;
+    private string? PdfContentType;
+    private long PdfFileSize;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var User = AuthState.User;
+
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            var UserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(UserIdClaim))
+            {
+                UserId = int.Parse(UserIdClaim);
+                UserName = User.Identity.Name ?? string.Empty;
+            }
+        }
+
+        await LoadPublishers();
+        await LoadCategories();
+    }
+
+    private async Task LoadPublishers()
+    {
+        try
+        {
+            var Response = await PublisherService.GetAllPublishers();
+            if (Response.Success && Response.Data != null)
+            {
+                Publishers = Response.Data;
+            }
+        }
+        catch (Exception Ex)
+        {
+            Console.WriteLine($"Erro ao carregar publishers: {Ex.Message}");
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var Response = await CategoryService.GetAllCategories();
+            if (Response.Success && Response.Data != null)
+            {
+                Categories = Response.Data;
+            }
+        }
+        catch (Exception Ex)
+        {
+            Console.WriteLine($"Erro ao carregar categorias: {Ex.Message}");
+        }
+    }
+
+    private void ToggleCategory(int CategoryId, bool IsChecked)
+    {
+        if (IsChecked)
+        {
+            if (!SelectedCategoryIds.Contains(CategoryId))
+            {
+                SelectedCategoryIds.Add(CategoryId);
+            }
+        }
+        else
+        {
+            SelectedCategoryIds.Remove(CategoryId);
+        }
+    }
+
+    private void NavigateToCreatePublisher()
+    {
+        Nav.NavigateTo("/Publisher");
+    }
+
+    private void NavigateToCreateCategory()
+    {
+        Nav.NavigateTo("/Category");
+    }
+
+    private async Task HandlePdfUpload(InputFileChangeEventArgs E)
+    {
+        ErrorMessage = null;
+        IsUploading = true;
+        UploadProgress = 0;
+
+        try
+        {
+            var File = E.File;
+
+            Console.WriteLine($"Iniciando upload: {File.Name} - {File.Size} bytes");
+
+            // Validações
+            if (File.Size > 52428800) // 50MB
+            {
+                ErrorMessage = "O arquivo PDF deve ter no máximo 50MB.";
+                IsUploading = false;
+                return;
+            }
+
+            if (!File.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "Apenas arquivos PDF são permitidos.";
+                IsUploading = false;
+                return;
+            }
+
+            UploadProgress = 10;
+            await InvokeAsync(StateHasChanged);
+
+            // Ler o arquivo em chunks (pedaços) para não sobrecarregar o SignalR
+            using var MemoryStream = new MemoryStream();
+            using var Stream = File.OpenReadStream(maxAllowedSize: 52428800);
+
+            var Buffer = new byte[8192]; // 8KB por chunk
+            int BytesRead;
+            long TotalBytesRead = 0;
+
+            while ((BytesRead = await Stream.ReadAsync(Buffer, 0, Buffer.Length)) > 0)
+            {
+                await MemoryStream.WriteAsync(Buffer, 0, BytesRead);
+                TotalBytesRead += BytesRead;
+
+                // Atualiza progresso
+                var Progress = (int)((TotalBytesRead * 80) / File.Size) + 10; // 10-90%
+                if (Progress != UploadProgress)
+                {
+                    UploadProgress = Progress;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+
+            UploadProgress = 90;
+            await InvokeAsync(StateHasChanged);
+
+            PdfBytes = MemoryStream.ToArray();
+            PdfFileName = File.Name;
+            PdfContentType = File.ContentType;
+            PdfFileSize = File.Size;
+
+            UploadProgress = 100;
+            IsUploading = false;
+
+            Console.WriteLine($"PDF carregado com sucesso: {PdfFileName} - {FormatFileSize(PdfFileSize)}");
+            Console.WriteLine($"Array de bytes criado: {PdfBytes.Length} bytes");
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception Ex)
+        {
+            ErrorMessage = $"Erro ao processar PDF: {Ex.Message}";
+            IsUploading = false;
+            Console.WriteLine($"ERRO DETALHADO: {Ex}");
+            Console.WriteLine($"Stack Trace: {Ex.StackTrace}");
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string FormatFileSize(long Bytes)
+    {
+        string[] Sizes = { "B", "KB", "MB", "GB" };
+        double Len = Bytes;
+        int Order = 0;
+
+        while (Len >= 1024 && Order < Sizes.Length - 1)
+        {
+            Order++;
+            Len = Len / 1024;
+        }
+
+        return $"{Len:0.##} {Sizes[Order]}";
+    }
+
+    private async Task PostBook()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+        IsSubmitting = true;
+
+        try
+        {
+            Console.WriteLine("=== INICIANDO CRIAÇÃO DO LIVRO ===");
+
+            if (PdfBytes == null || PdfBytes.Length == 0)
+            {
+                ErrorMessage = "Por favor, faça o upload do PDF antes de criar o livro.";
+                IsSubmitting = false;
+                return;
+            }
+
+            if (SelectedCategoryIds.Count == 0)
+            {
+                ErrorMessage = "Selecione pelo menos uma categoria.";
+                IsSubmitting = false;
+                return;
+            }
+
+            Console.WriteLine($"PDF bytes: {PdfBytes.Length}");
+            Console.WriteLine($"Nome: {Model.Name}");
+            Console.WriteLine($"Publisher ID: {Model.PublisherId}");
+            Console.WriteLine($"Categorias selecionadas: {SelectedCategoryIds.Count}");
+
+            await InvokeAsync(StateHasChanged);
+
+            Books NewBook = new()
+            {
+                Name = Model.Name,
+                Description = Model.Description,
+                PdfFile = PdfBytes,
+                PdfFileName = PdfFileName,
+                PdfContentType = PdfContentType,
+                PdfFileSize = PdfFileSize,
+                CoverImageUrl = Model.CoverImageUrl,
+                AmazonUrl = Model.AmazonUrl,
+                ISBN = Model.ISBN,
+                PublisherId = Model.PublisherId,
+                CreatedAt = Model.CreatedAt,
+                BookCategories = SelectedCategoryIds.Select(CategoryId => new BookCategories
+                {
+                    CategoryId = CategoryId
+                }).ToList()
+            };
+
+            Console.WriteLine("Objeto Books criado, chamando service...");
+
+            var Response = await BookService.PostBook(NewBook);
+
+            Console.WriteLine($"Response recebida. Success: {Response.Success}");
+
+            if (Response.Success)
+            {
+                SuccessMessage = "Livro criado com sucesso! Redirecionando...";
+                Console.WriteLine("✓ Livro criado com sucesso!");
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(1500);
+                Nav.NavigateTo("/Biblioteca", forceLoad: true);
+            }
+            else
+            {
+                ErrorMessage = Response.Message;
+                Console.WriteLine($"✗ Erro: {Response.Message}");
+            }
+        }
+        catch (Exception Ex)
+        {
+            ErrorMessage = $"Erro ao criar livro: {Ex.Message}";
+            Console.WriteLine($"=== ERRO CRÍTICO ===");
+            Console.WriteLine($"Message: {Ex.Message}");
+            Console.WriteLine($"Stack Trace: {Ex.StackTrace}");
+
+            if (Ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {Ex.InnerException.Message}");
+                Console.WriteLine($"Inner Stack Trace: {Ex.InnerException.StackTrace}");
+            }
+        }
+        finally
+        {
+            IsSubmitting = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}

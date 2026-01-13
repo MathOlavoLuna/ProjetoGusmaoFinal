@@ -1,7 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
+@inject ProjetoGusmaoFinal.Services.NewService NewService
 
 @page "/"
 @attribute [Authorize]
@@ -10,9 +12,33 @@
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
 
+    private string UserName = string.Empty;
+    private string UserRole = string.Empty;
+    private int UserId = 0;
+
+    ApiResponse<News> ResponseNews = new();
     private void NavigateToMatricula()
     {
         Nav.NavigateTo("/Matricula", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim))
+            {
+                UserId = int.Parse(userIdClaim); // ou Guid.Parse() se for Guid
+                UserName = user.Identity.Name ?? string.Empty;
+                UserRole = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+            }
+        }
+
+        ResponseNews = await NewService.GetNews();
     }
 }
 <body>
@@ -46,22 +72,19 @@
                 <div class="home-text-values">
                     Notícias
                 </div>
-                <ProjetoGusmaoFinal.Components.Buttons.DefaultButton NavigateUrl="/Noticia" ButtonText="Criar Nóticia" ButtonTextColor="white" ButtonColor="#eac556" ButtonUrlImage="images/Adicionar.svg" />
+                @if (UserRole == "Secretário" || UserRole  == "MANAGER")
+                {
+                    <ProjetoGusmaoFinal.Components.Buttons.DefaultButton NavigateUrl="/Noticia" ButtonText="Criar Nóticia" ButtonTextColor="white" ButtonColor="#eac556" ButtonUrlImage="images/Adicionar.svg" />
+                }
             </div>
         </div>
         <div class="row gap-5 justify-content-center">
-            <div class="col-12 col-md-3">
-                <ProjetoGusmaoFinal.Components.Cards.CardNews />
-            </div>
-            <div class="col-12 col-md-3">
-                <ProjetoGusmaoFinal.Components.Cards.CardNews />
-            </div>
-            <div class="col-12 col-md-3">
-                <ProjetoGusmaoFinal.Components.Cards.CardNews />
-            </div>
-            <div class="col-12 col-md-3">
-                <ProjetoGusmaoFinal.Components.Cards.CardNews />
-            </div>
+            @foreach(var item in ResponseNews.Data)
+            {
+                <div class="col-12 col-md-3">
+                    <ProjetoGusmaoFinal.Components.Cards.CardNews Title="@item.Title" SummaryText="@item.Description" />
+                </div>
+            }
         </div>
     </div>
     <script src="_framework/blazor.web.js"></script>

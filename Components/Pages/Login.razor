@@ -28,10 +28,11 @@
             if (Response.Success)
             {
                 List<Claim> claims = new()
-                {
-                    new Claim(ClaimTypes.Name, Response.Data[0].Name),
-                    new Claim(ClaimTypes.Role, Response.Data[0].Role?.Name ?? "DEFAULT ROLE")
-                };
+            {
+                new Claim(ClaimTypes.NameIdentifier, Response.Data[0].Id.ToString()),
+                new Claim(ClaimTypes.Name, Response.Data[0].Name),
+                new Claim(ClaimTypes.Role, Response.Data[0].Role?.Name ?? "DEFAULT ROLE")
+            };
 
                 ClaimsIdentity claimsIdentity = new(claims, "CookieAuth");
                 ClaimsPrincipal claimsPrincipal = new(claimsIdentity);

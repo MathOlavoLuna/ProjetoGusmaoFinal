@@ -17,6 +17,7 @@ namespace ProjetoGusmaoFinal.Services
             {
                 HashResponse ResponseHash = HashService.Crypt(Password);
                 Users FoundUser = await _context.Users.FirstOrDefaultAsync(u => Email == u.Email) ?? new();
+                FoundUser.Role = await _context.Roles.FindAsync(FoundUser.RoleID);
                 Response.Data.Add(FoundUser);
                 if (FoundUser.Password != ResponseHash.Hash) {
                     Response.Message = "Senha incorreta, tente novamente.";
@@ -47,7 +48,7 @@ namespace ProjetoGusmaoFinal.Services
             ApiResponse<Users> Response = new();
             try
             {
-
+                User.Role = await _context.Roles.FindAsync(User.RoleID);
                 Users CreatedUser = await _entity.Post(User);
                 Response.Data.Add(CreatedUser);
                 Response.Success = true;

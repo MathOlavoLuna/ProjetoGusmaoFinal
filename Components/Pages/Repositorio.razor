@@ -1,0 +1,137 @@
+﻿@page "/Repositorio"
+@using Microsoft.AspNetCore.Authorization
+@inject ProjetoGusmaoFinal.Services.BookService BookService
+@inject NavigationManager Nav
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<div class="container" style="padding-top:8%;">
+    <div class="row mb-4">
+        <div class="col-6">
+            <h2>Biblioteca</h2>
+        </div>
+        <div class="col-6 text-end">
+            <button class="btn btn-primary" @onclick="GoToCreateBook">
+                + Adicionar Livro
+            </button>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    }
+    else if (Books.Count == 0)
+    {
+        <div class="alert alert-info">
+            Nenhum livro cadastrado ainda.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var Book in Books)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(Book.CoverImageUrl))
+                        {
+                            <img src="@Book.CoverImageUrl" class="card-img-top" alt="@Book.Name" style="height: 300px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 300px;">
+                                <span class="text-white">Sem Capa</span>
+                            </div>
+                        }
+
+                        <div class="card-body">
+                            <h5 class="card-title">@Book.Name</h5>
+                            <p class="card-text text-muted">@Book.Publisher?.Name</p>
+
+                            @if (!string.IsNullOrEmpty(Book.Description))
+                            {
+                                <p class="card-text small">
+                                    @(Book.Description.Length > 100 ? Book.Description.Substring(0, 100) + "..." : Book.Description)
+                                </p>
+                            }
+
+                            <div class="mb-2">
+                                @foreach (var BookCategory in Book.BookCategories)
+                                {
+                                    <span class="badge bg-secondary me-1">@BookCategory.Category?.Name</span>
+                                }
+                            </div>
+
+                            @if (Book.PdfFileSize.HasValue)
+                            {
+                                <small class="text-muted d-block">Tamanho: @FormatFileSize(Book.PdfFileSize.Value)</small>
+                            }
+                        </div>
+
+                        <div class="card-footer bg-transparent">
+                            <a href="/api/BookDownload/@Book.Id" class="btn btn-primary btn-sm w-100 mb-2" target="_blank">
+                                📥 Baixar PDF
+                            </a>
+
+                            @if (!string.IsNullOrEmpty(Book.AmazonUrl))
+                            {
+                                <a href="@Book.AmazonUrl" class="btn btn-outline-warning btn-sm w-100" target="_blank">
+                                    🛒 Comprar na Amazon
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Books> Books = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooks();
+    }
+
+    private async Task LoadBooks()
+    {
+        IsLoading = true;
+
+        var Response = await BookService.GetAllBooks();
+
+        if (Response.Success && Response.Data != null)
+        {
+            Books = Response.Data;
+        }
+
+        IsLoading = false;
+    }
+
+    private void GoToCreateBook()
+    {
+        Nav.NavigateTo("/Book");
+    }
+
+    private string FormatFileSize(long Bytes)
+    {
+        string[] Sizes = { "B", "KB", "MB", "GB" };
+        double Len = Bytes;
+        int Order = 0;
+
+        while (Len >= 1024 && Order < Sizes.Length - 1)
+        {
+            Order++;
+            Len = Len / 1024;
+        }
+
+        return $"{Len:0.##} {Sizes[Order]}";
+    }
+}

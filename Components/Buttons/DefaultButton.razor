@@ -6,7 +6,7 @@
     [Parameter]
     public string ButtonTextColor { get; set; } = string.Empty;
     [Parameter]
-    public string ButtonColor { get; set; } = string.Empty; //Passe um padrão que o css aceite, HEX ou RGB;
+    public string ButtonColor { get; set; } = string.Empty; 
     [Parameter]
     public bool ButtonShadow { get; set; } = false;
     [Parameter]
@@ -18,12 +18,12 @@
 
     private async Task HandleClick()
     {
-        // Se tiver EventCallback, executa ele
+
         if (OnClick.HasDelegate)
         {
             await OnClick.InvokeAsync();
         }
-        // Senão, se tiver URL, navega
+
         else if (!string.IsNullOrEmpty(NavigateUrl))
         {
             Nav.NavigateTo(NavigateUrl);

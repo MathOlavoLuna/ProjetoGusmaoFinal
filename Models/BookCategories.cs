@@ -1,11 +1,23 @@
-﻿namespace ProjetoGusmaoFinal.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ProjetoGusmaoFinal.Models
 {
+    [Table("book_categories")]
     public class BookCategories
     {
-        public int Id { get; set; } 
-        public Books Book { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
         public int BookId { get; set; }
-        public Categories Category { get; set; }
+
+        [ForeignKey("BookId")]
+        public virtual Books? Book { get; set; }
+
         public int CategoryId { get; set; }
+
+        [ForeignKey("CategoryId")]
+        public virtual Category? Category { get; set; }
     }
 }

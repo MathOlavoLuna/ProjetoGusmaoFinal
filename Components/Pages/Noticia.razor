@@ -2,9 +2,12 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
-@inject ProjetoGusmaoFinal.Services.UserService UserService
-@attribute [AllowAnonymous]
+@inject ProjetoGusmaoFinal.Services.NewService NewService
+@attribute [Authorize]
 @rendermode InteractiveServer
 
 <div class="container d-flex justify-content-center align-items-center min-vh-100">
@@ -12,7 +15,7 @@
         <DataAnnotationsValidator />
         <div class="row w-50 border border-1 rounded-4 border-black p-2 justify-content-center">
             <div class="row justify-content-between">
-                <div class="w-50">Criar Nóticia</div> <button class="w-25">Criar</button>
+                <div class="w-50">Criar Nóticia</div> <button class="w-25" @onclick="PostNews">Criar</button>
             </div>
             <div class="row gap-1">
                 <label class="form-label" for="Titulo">Título</label>
@@ -29,12 +32,62 @@
 
     private class NewsCreate
     {
+        [Required(ErrorMessage = "Título obrigatório.")]
         public string Title { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Texto Sobre Nóticia obrigatório.")]
         public string ConteudoEscrito { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int UserId { get; set; }
     }
-}
-@code {
+
+
+    ApiResponse<News> Response = new();
+
+    private async Task PostNews()
+    {
+        try
+        {
+            News NewNews = new()
+            {
+                Title = Model.Title,
+                Description = Model.ConteudoEscrito,
+                CreatedAt  = Model.CreatedAt,
+                UserId = UserId
+            };
+            Response = await NewService.PostNew(NewNews);
+
+            if (Response.Success)
+            {
+                Nav.NavigateTo("/");
+            }
+        }
+        catch (NavigationException)
+        {
+            Nav.NavigateTo("/", true);
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Error ao criar nóticia.");
+        }
+    }
+
+    private int UserId;
+    private string UserName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var User = AuthState.User;
+
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            var UserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(UserIdClaim))
+            {
+                UserId = int.Parse(UserIdClaim);
+                UserName = User.Identity.Name ?? string.Empty;
+            }
+        }
+    }
 
 }
