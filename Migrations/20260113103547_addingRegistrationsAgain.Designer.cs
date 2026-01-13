@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProjetoGusmaoFinal.Data;
 
@@ -11,9 +12,11 @@ using ProjetoGusmaoFinal.Data;
 namespace ProjetoGusmaoFinal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260113103547_addingRegistrationsAgain")]
+    partial class addingRegistrationsAgain
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -226,26 +229,6 @@ namespace ProjetoGusmaoFinal.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "MANAGER",
-                            RoleDescription = "Pode adicionar livros PDF."
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "ALUNO",
-                            RoleDescription = "Usuário comum"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "SECRETÁRIO",
-                            RoleDescription = "Pode criar nóticias e adicionar livros PDF."
-                        });
                 });
 
             modelBuilder.Entity("ProjetoGusmaoFinal.Models.Users", b =>

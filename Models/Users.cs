@@ -6,7 +6,7 @@ namespace ProjetoGusmaoFinal.Models
     {
         public int Id { get; set; }
         public Roles? Role { get; set; }
-        public int RoleID { get; set; } = 7;
+        public int RoleID { get; set; }
 
         [Column("Name")]
         public string Name { get; set; } = string.Empty;

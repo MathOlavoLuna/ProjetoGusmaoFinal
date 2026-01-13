@@ -1,6 +1,8 @@
 ﻿// Data/DataContext.cs
 using Microsoft.EntityFrameworkCore;
 using ProjetoGusmaoFinal.Models;
+using System.Data;
+using System.Reflection.Emit;
 
 namespace ProjetoGusmaoFinal.Data
 {
@@ -16,12 +18,19 @@ namespace ProjetoGusmaoFinal.Data
         public DbSet<News> News { get; set; }
         public DbSet<Books> Books { get; set; }
         public DbSet<Publisher> Publishers { get; set; }
+        public DbSet<Registrations> Registrations { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<BookCategories> BookCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder ModelBuilder)
         {
             base.OnModelCreating(ModelBuilder);
+
+            ModelBuilder.Entity<Roles>().HasData(
+                new Roles { Id = 1, Name = "MANAGER", RoleDescription = "Pode adicionar livros PDF." },
+                new Roles { Id = 2, Name = "ALUNO", RoleDescription = "Usuário comum" },
+                new Roles { Id = 3, Name = "SECRETÁRIO", RoleDescription = "Pode criar nóticias e adicionar livros PDF." }
+            );
 
             // Configuração Users
             ModelBuilder.Entity<Users>(entity =>
@@ -71,7 +80,7 @@ namespace ProjetoGusmaoFinal.Data
 
                 // Configuração para BLOB (PDF)
                 entity.Property(e => e.PdfFile)
-                    .HasColumnType("LONGBLOB"); // Para MySQL/MariaDB
+                    .HasColumnType("LONGBLOB");
             });
 
             // Configuração Publisher
@@ -90,7 +99,7 @@ namespace ProjetoGusmaoFinal.Data
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            // Configuração BookCategories (Many-to-Many)
+            // Configuração BookCategories
             ModelBuilder.Entity<BookCategories>(entity =>
             {
                 entity.ToTable("book_categories");
@@ -107,7 +116,7 @@ namespace ProjetoGusmaoFinal.Data
                     .HasForeignKey(e => e.CategoryId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Índice único para evitar duplicação
+               
                 entity.HasIndex(e => new { e.BookId, e.CategoryId })
                     .IsUnique();
             });

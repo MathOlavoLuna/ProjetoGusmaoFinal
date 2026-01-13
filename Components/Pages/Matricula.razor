@@ -82,7 +82,8 @@
             Name = Model.Name,
             Email = Model.Email,
             Password = Model.Password,
-            CPF = Model.CPF
+            CPF = Model.CPF,
+            RoleID = 2
         };
 
         PassHashed = HashService.Crypt(Model.Password);
@@ -92,6 +93,7 @@
         {
             NewUser.Name += $" {Sobrenome}";
         }
+
         ApiResponse<Users> Response = await UserService.PostUser(NewUser);
 
         if (Response.Success)

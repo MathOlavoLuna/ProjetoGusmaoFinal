@@ -78,7 +78,8 @@
             Name = Model.Name,
             Email = Model.Email,
             Password = Model.Password,
-            CPF = Model.CPF
+            CPF = Model.CPF,
+            RoleID = 1
         };
 
         PassHashed = HashService.Crypt(Model.Password);
