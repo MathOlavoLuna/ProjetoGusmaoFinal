@@ -9,41 +9,63 @@ using ProjetoGusmaoFinal.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 104857600; 
+    options.StreamBufferCapacity = 20;
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// ⚠️ CONFIGURAÇÃO CRÍTICA: Limites para upload de arquivos
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 104857600; // 100 MB
+    options.MultipartBodyLengthLimit = 104857600;
     options.ValueLengthLimit = 104857600;
     options.MultipartHeadersLengthLimit = 104857600;
 });
 
-// ⚠️ CONFIGURAÇÃO CRÍTICA: Limites do Kestrel
+
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 104857600; // 100 MB
+    options.Limits.MaxRequestBodySize = 104857600;
 });
 
-// ⚠️ CONFIGURAÇÃO CRÍTICA: Limites do SignalR (para Blazor Server)
+
 builder.Services.Configure<HubOptions>(options =>
 {
-    options.MaximumReceiveMessageSize = 104857600; // 100 MB
+    options.MaximumReceiveMessageSize = 104857600;
     options.MaximumParallelInvocationsPerClient = 2;
     options.StreamBufferCapacity = 20;
     options.EnableDetailedErrors = true; // Útil para debug
 });
 
-// ⚠️ CONFIGURAÇÃO CRÍTICA: Configurações do Blazor Server
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600;
+    options.ValueLengthLimit = 104857600;
+    options.MultipartHeadersLengthLimit = 104857600;
+});
+
 builder.Services.AddServerSideBlazor(options =>
 {
     options.DetailedErrors = true;
-    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
-    options.DisconnectedCircuitMaxRetained = 100;
-    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(2);
-    options.MaxBufferedUnacknowledgedRenderBatches = 20;
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(2);
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(1);
 });
 
 // Configuração do DbContext

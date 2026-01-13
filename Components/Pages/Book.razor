@@ -124,7 +124,7 @@
                     <label class="form-label" for="PdfFile">Arquivo PDF do Livro *</label>
                     <InputFile id="PdfFile" class="form-control" OnChange="HandlePdfUpload" accept=".pdf" />
                     <small class="text-muted">Máximo 50MB - O arquivo será armazenado no banco de dados</small>
-
+    
                     @if (IsUploading)
                     {
                         <div class="mt-2">
@@ -200,23 +200,42 @@
     private string? PdfContentType;
     private long PdfFileSize;
 
+    private bool IsInitializingFileInput = false;
     protected override async Task OnInitializedAsync()
     {
-        var AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var User = AuthState.User;
-
-        if (User.Identity?.IsAuthenticated ?? false)
+        try
         {
-            var UserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!string.IsNullOrEmpty(UserIdClaim))
-            {
-                UserId = int.Parse(UserIdClaim);
-                UserName = User.Identity.Name ?? string.Empty;
-            }
-        }
+            IsInitializingFileInput = true;
+            await InvokeAsync(StateHasChanged);
+            
+            var AuthState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var User = AuthState.User;
 
-        await LoadPublishers();
-        await LoadCategories();
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var UserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(UserIdClaim))
+                {
+                    UserId = int.Parse(UserIdClaim);
+                    UserName = User.Identity.Name ?? string.Empty;
+                }
+            }
+
+            await LoadPublishers();
+            await LoadCategories();
+            
+            await Task.Delay(100);
+        }
+        catch (Exception ex)
+        {
+            // Logger.LogError(ex, "Erro ao inicializar componente Book");
+            ErrorMessage = "Erro ao inicializar componente. Tente recarregar a página.";
+        }
+        finally
+        {
+            IsInitializingFileInput = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task LoadPublishers()
@@ -277,81 +296,62 @@
     }
 
     private async Task HandlePdfUpload(InputFileChangeEventArgs E)
-    {
-        ErrorMessage = null;
-        IsUploading = true;
-        UploadProgress = 0;
-
-        try
         {
-            var File = E.File;
-
-            Console.WriteLine($"Iniciando upload: {File.Name} - {File.Size} bytes");
-
-            // Validações
-            if (File.Size > 52428800) // 50MB
-            {
-                ErrorMessage = "O arquivo PDF deve ter no máximo 50MB.";
-                IsUploading = false;
-                return;
-            }
-
-            if (!File.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                ErrorMessage = "Apenas arquivos PDF são permitidos.";
-                IsUploading = false;
-                return;
-            }
-
-            UploadProgress = 10;
+            ErrorMessage = null;
+            IsUploading = true;
+            UploadProgress = 0;
+    
+     
+            await Task.Delay(1);
             await InvokeAsync(StateHasChanged);
 
-            // Ler o arquivo em chunks (pedaços) para não sobrecarregar o SignalR
-            using var MemoryStream = new MemoryStream();
-            using var Stream = File.OpenReadStream(maxAllowedSize: 52428800);
-
-            var Buffer = new byte[8192]; // 8KB por chunk
-            int BytesRead;
-            long TotalBytesRead = 0;
-
-            while ((BytesRead = await Stream.ReadAsync(Buffer, 0, Buffer.Length)) > 0)
+            try
             {
-                await MemoryStream.WriteAsync(Buffer, 0, BytesRead);
-                TotalBytesRead += BytesRead;
+                var File = E.File;
 
-                // Atualiza progresso
-                var Progress = (int)((TotalBytesRead * 80) / File.Size) + 10; // 10-90%
-                if (Progress != UploadProgress)
+                if (File.Size > 52428800)
                 {
-                    UploadProgress = Progress;
+                    ErrorMessage = "O arquivo PDF deve ter no máximo 50MB.";
+                    IsUploading = false;
                     await InvokeAsync(StateHasChanged);
+                    return;
                 }
+
+                
+                var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(30));
+
+                
+                using var memoryStream = new MemoryStream();
+                using var stream = File.OpenReadStream(52428800);
+        
+                await stream.CopyToAsync(memoryStream, cancellationTokenSource.Token);
+
+                PdfBytes = memoryStream.ToArray();
+                PdfFileName = File.Name;
+                PdfContentType = File.ContentType;
+                PdfFileSize = File.Size;
+        
+                IsUploading = false;
+                await InvokeAsync(StateHasChanged);
             }
-
-            UploadProgress = 90;
-            await InvokeAsync(StateHasChanged);
-
-            PdfBytes = MemoryStream.ToArray();
-            PdfFileName = File.Name;
-            PdfContentType = File.ContentType;
-            PdfFileSize = File.Size;
-
-            UploadProgress = 100;
-            IsUploading = false;
-
-            Console.WriteLine($"PDF carregado com sucesso: {PdfFileName} - {FormatFileSize(PdfFileSize)}");
-            Console.WriteLine($"Array de bytes criado: {PdfBytes.Length} bytes");
-
-            await InvokeAsync(StateHasChanged);
+            catch (OperationCanceledException)
+            {
+                ErrorMessage = "Upload cancelado por timeout. Tente um arquivo menor.";
+                IsUploading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception Ex)
+            {
+                ErrorMessage = $"Erro: {Ex.Message}";
+                IsUploading = false;
+                await InvokeAsync(StateHasChanged);
+            }
         }
-        catch (Exception Ex)
-        {
-            ErrorMessage = $"Erro ao processar PDF: {Ex.Message}";
-            IsUploading = false;
-            Console.WriteLine($"ERRO DETALHADO: {Ex}");
-            Console.WriteLine($"Stack Trace: {Ex.StackTrace}");
-            await InvokeAsync(StateHasChanged);
-        }
+    public void Dispose()
+    {
+        PdfBytes = null;
+        GC.Collect();
     }
 
     private string FormatFileSize(long Bytes)
